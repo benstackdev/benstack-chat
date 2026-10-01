@@ -1,0 +1,17 @@
+FROM node:24-slim AS base
+WORKDIR /api
+
+COPY package*.json ./
+
+RUN pnpm i
+
+COPY . .
+
+FROM base AS dev
+EXPOSE 8080
+CMD [ "pnpm", "run", "dev" ]
+
+FROM base AS build
+RUN pnpm run build
+
+# Write prod for VPS later

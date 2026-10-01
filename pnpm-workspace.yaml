@@ -4,3 +4,5 @@ packages:
 allowBuilds:
   argon2: true
   esbuild: true
+catalog:
+  typescript: ~7.0.2

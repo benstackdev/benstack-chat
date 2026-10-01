@@ -1,0 +1,18 @@
+FROM node:24-slim AS base
+WORKDIR /web
+
+COPY package*.json ./
+
+RUN corepack enable
+RUN pnpm i
+
+COPY . . 
+
+FROM base AS dev
+EXPOSE 5173
+CMD ["pnpm", "run", "dev"]
+
+FROM base AS build
+RUN pnpm run build
+
+# Write prod for VPS later
