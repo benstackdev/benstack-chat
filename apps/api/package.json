@@ -15,10 +15,12 @@
     "@hono/node-server": "^2.0.8",
     "argon2": "^0.44.0",
     "better-auth": "^1.7.6",
+    "better-invite": "^0.5.8",
     "dotenv": "^18.0.4",
     "drizzle-orm": "^1.0.0-rc.4",
     "hono": "^4.12.28",
-    "postgres": "^3.4.9"
+    "postgres": "^3.4.9",
+    "resend": "^6.31.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",

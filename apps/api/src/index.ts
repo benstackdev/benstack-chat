@@ -3,6 +3,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
+import { auth } from 'lib/auth.ts';
 
 const app = new Hono();
 
@@ -23,6 +24,8 @@ app.get('/', async (c) => {
   }
   return c.text(`${JSON.stringify(dummyQuery)}`);
 });
+
+app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 serve({
   fetch: app.fetch,

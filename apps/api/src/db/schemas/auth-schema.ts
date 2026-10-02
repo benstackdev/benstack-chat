@@ -1,5 +1,12 @@
 import { relations } from "drizzle-orm/_relations";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  index,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -12,6 +19,10 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  role: text("role"),
+  banned: boolean("banned").default(false),
+  banReason: text("ban_reason"),
+  banExpires: timestamp("ban_expires"),
 });
 
 export const session = pgTable(
@@ -29,6 +40,7 @@ export const session = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
+    impersonatedBy: text("impersonated_by"),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
 );
@@ -73,9 +85,43 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const invite = pgTable("invite", {
+  id: text("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  createdAt: timestamp("created_at").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  maxUses: integer("max_uses").notNull(),
+  infinityMaxUses: boolean("infinity_max_uses").default(false).notNull(),
+  createdByUserId: text("created_by_user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "set null" }),
+  redirectToAfterUpgrade: text("redirect_to_after_upgrade"),
+  shareInviterName: boolean("share_inviter_name").notNull(),
+  email: text("email"),
+  emails: text("emails").array(),
+  role: text("role").notNull(),
+  newAccount: boolean("new_account"),
+  status: text("status", {
+    enum: ["pending", "rejected", "canceled", "used"],
+  }).notNull(),
+});
+
+export const inviteUse = pgTable("invite_use", {
+  id: text("id").primaryKey(),
+  inviteId: text("invite_id")
+    .notNull()
+    .references(() => invite.id, { onDelete: "set null" }),
+  usedAt: timestamp("used_at").notNull(),
+  usedByUserId: text("used_by_user_id").references(() => user.id, {
+    onDelete: "set null",
+  }),
+});
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
+  invites: many(invite),
+  inviteUses: many(inviteUse),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -88,6 +134,25 @@ export const sessionRelations = relations(session, ({ one }) => ({
 export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
+    references: [user.id],
+  }),
+}));
+
+export const inviteRelations = relations(invite, ({ one, many }) => ({
+  user: one(user, {
+    fields: [invite.createdByUserId],
+    references: [user.id],
+  }),
+  inviteUses: many(inviteUse),
+}));
+
+export const inviteUseRelations = relations(inviteUse, ({ one }) => ({
+  invite: one(invite, {
+    fields: [inviteUse.inviteId],
+    references: [invite.id],
+  }),
+  user: one(user, {
+    fields: [inviteUse.usedByUserId],
     references: [user.id],
   }),
 }));

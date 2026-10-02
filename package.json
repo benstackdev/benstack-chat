@@ -16,7 +16,8 @@
     "db:studio": "pnpm run --filter api studio",
     "shared:build": "pnpm run --filter shared build",
     "docker-dev:up": "docker compose up -d",
-    "docker-dev:down": "docker compose down"
+    "docker-dev:down": "docker compose down",
+    "test": "pnpm run --filter web test"
   },
   "keywords": [],
   "author": "",
