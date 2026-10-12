@@ -11,7 +11,7 @@ import * as authSchema from "@db/schemas/auth-schema.ts";
 
 dotenv.config({ path: path.resolve(cwd(), ".env") });
 
-export type RoleType = "user" | "admin";
+export type RoleType = "guest" | "user" | "admin";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -23,10 +23,12 @@ export const auth = betterAuth({
   },
   plugins: [
     admin({
-      defaultRole: "user" as RoleType
+      defaultRole: "guest" as RoleType
     }),
     invite({
+      defaultMaxUses: 1,
       defaultRedirectAfterUpgrade: "/auth/invited?token={token}",
+      defaultCustomInviteUrl: "/activate-invite",
       async sendUserInvitation({ email, role, url, token, newAccount }) {
         if (newAccount)
           void sendInvitationEmail(role as RoleType, email, url, token);

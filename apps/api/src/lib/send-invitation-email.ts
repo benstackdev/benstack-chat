@@ -6,7 +6,7 @@ export const sendInvitationEmail = async (role: RoleType, email: string, url: st
     from: 'BenStack Chat <chat@benstack.dev>',
     to: email,
     subject: "You've been invited to join BenStack Chat!",
-    html: `Activation token: ${token}`
+    html: `Activation URL: ${url}`
   });
 
   if (error) {

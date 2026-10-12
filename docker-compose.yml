@@ -11,7 +11,7 @@ services:
       - "8080:8080"
   db:
     image: postgres:18-alpine
-    env_file: ".env"
+    env_file: "./apps/api/.env"
     ports:
       - 5432:5432
     volumes:
