@@ -7,6 +7,7 @@ import { cwd } from "process";
 import { admin } from "better-auth/plugins";
 import { invite } from "better-invite";
 import { sendInvitationEmail } from "./send-invitation-email.ts";
+import * as authSchema from "@db/schemas/auth-schema.ts";
 
 dotenv.config({ path: path.resolve(cwd(), ".env") });
 
@@ -14,7 +15,8 @@ export type RoleType = "user" | "admin";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg"
+    provider: "pg",
+    schema: authSchema
   }),
   emailAndPassword: {
     enabled: true
@@ -27,7 +29,7 @@ export const auth = betterAuth({
       defaultRedirectAfterUpgrade: "/auth/invited?token={token}",
       async sendUserInvitation({ email, role, url, token, newAccount }) {
         if (newAccount)
-          void sendInvitationEmail(role as RoleType, email, url);
+          void sendInvitationEmail(role as RoleType, email, url, token);
       }
     })
   ]

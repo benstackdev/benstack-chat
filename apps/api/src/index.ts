@@ -1,3 +1,4 @@
+import { validateInvite } from 'controllers/invite-middleware.ts';
 import { db } from './db/client.ts';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
@@ -26,6 +27,9 @@ app.get('/', async (c) => {
 });
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+//! Testing only
+app.get("/api/invite/:token", validateInvite);
 
 serve({
   fetch: app.fetch,
