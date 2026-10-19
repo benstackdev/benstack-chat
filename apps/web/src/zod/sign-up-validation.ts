@@ -13,3 +13,8 @@ export const signUpValidation = z.object({
     error: "Password does not match",
     path: ["passwordConfirm"]
   });
+
+export const adminSignInValidation = z.object({
+  email: z.email(),
+  password: z.string().regex(passwordRegex, { error: "Invalid passowrd format" })
+});

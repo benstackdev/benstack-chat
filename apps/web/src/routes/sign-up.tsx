@@ -8,8 +8,11 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { useNavigate } from "react-router";
 
 export function Signup() {
+  const navigate = useNavigate();
+
   const { control, handleSubmit } = useForm<z.infer<typeof signUpValidation>>({
     resolver: zodResolver(signUpValidation),
     mode: "onSubmit",
@@ -33,7 +36,7 @@ export function Signup() {
       return;
     }
 
-    console.log(JSON.stringify(data));
+    navigate("/guest");
   });
 
   return (

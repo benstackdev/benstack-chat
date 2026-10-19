@@ -11,6 +11,7 @@ import * as authSchema from "@db/schemas/auth-schema.ts";
 
 dotenv.config({ path: path.resolve(cwd(), ".env") });
 
+// TODO: Make global type in shared package
 export type RoleType = "guest" | "user" | "admin";
 
 export const auth = betterAuth({
@@ -24,6 +25,12 @@ export const auth = betterAuth({
   ],
   emailAndPassword: {
     enabled: true
+  },
+  socialProviders: {
+    discord: {
+      clientId: process.env.DISCORD_CLIENT_ID as string,
+      clientSecret: process.env.DISCORD_CLIENT_SECRET as string
+    }
   },
   plugins: [
     admin({
