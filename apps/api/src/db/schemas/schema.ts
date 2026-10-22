@@ -21,6 +21,7 @@ export const conversation = pgTable("conversation", {
 
 export const message = pgTable("message", {
   id: text("id").primaryKey(),
+  senderId: text("sender_id").notNull().references(() => user_member.id, { onDelete: "no action" }),
   conversationId: text("conversation_id").notNull().references(() => conversation.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   timeSent: timestamp("time_sent").notNull().defaultNow()

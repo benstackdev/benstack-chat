@@ -1,0 +1,2 @@
+ALTER TABLE "message" ADD COLUMN "sender_id" text NOT NULL;--> statement-breakpoint
+ALTER TABLE "message" ADD CONSTRAINT "message_sender_id_user_member_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "user_member"("id");
