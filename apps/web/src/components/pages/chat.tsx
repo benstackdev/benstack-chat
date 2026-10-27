@@ -9,17 +9,20 @@ import { Field, FieldLabel } from "../ui/field";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
-import { Message, MessageAvatar, MessageContent } from "../ui/message";
-import { DummyAvatar } from "../dummy-avatar";
-import { DummyBubble } from "../dummy-bubble";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { messageDisplayValidation } from "@/zod/message-display";
+import { ChatMessage } from "../chat-message";
+
+type MessageDisplayType = z.infer<typeof messageDisplayValidation>;
 
 export function Chat() {
   const {
     data: session,
-    isPending,
-    error,
-    refetch
+    isPending
   } = authClient.useSession();
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const [messages, setMessages] = useState<MessageDisplayType[]>([]);
 
   const { control, handleSubmit, reset } = useForm<z.infer<typeof messageValidation>>({
     resolver: zodResolver(messageValidation),
@@ -31,9 +34,35 @@ export function Chat() {
 
   const onSubmit = handleSubmit(async (formData) => {
     // Web socket stuff???
+    sendMessage(session?.user.name!, formData.content);
     reset();
-    console.log(formData);
   });
+
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8080/ws");
+
+    socket.onopen = () => {
+      console.log("Socket opened (client)");
+    };
+
+    socket.onmessage = (event) => {
+      setMessages((prev) => [...prev, JSON.parse(event.data)]);
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error (client): ", error);
+    };
+
+    wsRef.current = socket;
+
+    return () => {
+      socket.close(1000, "WebSocket unmounted");
+    };
+  }, []);
+
+  const sendMessage = useCallback((username: string, content: string) => {
+    wsRef.current?.send(JSON.stringify({ username, content }));
+  }, []);
 
   if (isPending)
     return <ChatLoading />;
@@ -46,22 +75,10 @@ export function Chat() {
       <CardContent>
         {/* Messages go here */}
         <div className="flex flex-col gap-y-4">
-          <Message align="end">
-            <MessageAvatar>
-              <DummyAvatar initial="T" />
-            </MessageAvatar>
-            <MessageContent>
-              <DummyBubble msg="Hello World!" />
-            </MessageContent>
-          </Message>
-          <Message>
-            <MessageAvatar>
-              <DummyAvatar initial="S" />
-            </MessageAvatar>
-            <MessageContent>
-              <DummyBubble msg="Welcome to BenStack Chat! This is a longer test message" />
-            </MessageContent>
-          </Message>
+          {messages.map(
+            (msg, idx) =>
+              <ChatMessage key={`${msg.username}-${idx}`} username={msg.username} content={msg.content} alignEnd={msg.username === session?.user.name} />
+          )}
         </div>
       </CardContent>
       <CardFooter>
@@ -83,6 +100,7 @@ export function Chat() {
                 </FieldLabel>
                 <Textarea
                   {...field}
+                  className="min-w-md"
                   id={field.name}
                   name={field.name}
                   aria-invalid={fieldState.invalid}

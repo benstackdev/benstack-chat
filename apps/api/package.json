@@ -20,11 +20,13 @@
     "drizzle-orm": "^1.0.0-rc.5-ab785fc",
     "hono": "^4.13.13",
     "postgres": "^3.4.9",
-    "resend": "^6.32.1"
+    "resend": "^6.32.1",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
     "@types/pg": "^8.23.1",
+    "@types/ws": "^8.18.2",
     "drizzle-kit": "^1.0.0-rc.5-ab785fc",
     "tsx": "^4.23.15",
     "typescript": "catalog:"
